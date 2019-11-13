@@ -1,0 +1,33 @@
+{
+  "name": "Sfts2S3",
+  "version": "1.0.0",
+  "description": "move files from BC Secure File Transfer Service to s3, once or cron",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "s3"
+  ],
+  "author": "f-w",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bcgov/sp2s3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bcgov/sp2s3/issues"
+  },
+  "homepage": "https://github.com/bcgov/sp2s3#readme",
+  "dependencies": {
+    "async": "^2.6.1",
+    "aws-sdk": "^2.261.1",
+    "cron": "^1.3.0",
+    "node-getopt": "^0.3.2",
+    "request": "^2.88.0"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  }
+}

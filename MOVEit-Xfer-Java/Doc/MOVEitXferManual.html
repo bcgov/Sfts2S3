@@ -1,0 +1,637 @@
+	<html>
+<head>
+<title>MOVEit Xfer - Command Line Secure File Transfer Client for MOVEit DMZ</title>
+<link rel="stylesheet" type="text/css" href="MOVEitDocStylesheet.css"/>
+</head>
+<body>
+
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+  <tr>
+
+    <td width="26%"><img src="images_moveitxfer/moveit_xferR_150.png" width="150" height="77"
+    alt="MOVEit Xfer Logo"/></td>
+    <td width="74%"><h1>MOVEit Xfer: <br/>
+    Command-Line Secure File Transfer <br/>Client for MOVEit DMZ</h1>
+    </td>
+  </tr>
+</table>
+
+<h2>Overview<a name="overview"></a></h2>
+
+<p>MOVEit Xfer ("/ex-fer/") is a command-line application which
+securely transfers files between a MOVEit DMZ server
+and a Microsoft Windows computer or any computer running Java 1.7 or higher.
+&#160;
+</p>
+
+<p><img src="images_moveitxfer/layout.png"/></p>
+
+<p>
+Designed to mimic the interface of a standard command-line FTP client,
+this utility provides an easy upgrade path from command-line FTP clients
+working against an
+insecure or firewall-adverse FTP system
+to command-line MOVEit Xfer clients working with
+a secure and firewall-friendly MOVEit DMZ system.
+</p>
+
+<p>MOVEit Xfer features:
+<ul>
+	<li>Single TCP port (HTTPS) file transfers</li>
+	<li>On-the-fly data transmission compression to conserve bandwidth and speed transfers</li>
+	<li>Cryptographic-quality file integrity checks to guard against truncation or corruption during transit</li>
+	<li>Resuming of partial transfers</li>
+	<li>Microsoft or Java SSL/TLS encryption libraries during transport</li>
+	<li>MOVEit Crypto's FIPS-140-2 validated AES encryption during storage on a MOVEit DMZ server</li>
+	<li>HTTP/S proxy server support</li>
+	<li>USB-Friendly "Portable" deployment</li>
+</ul>
+</p>
+
+<p>Like any other well-behaved command-line utility, MOVEit Xfer can be driven by an automated script
+such as a Windows batch file or Unix shell script.
+In turn, these scripts can be scheduled by Windows Scheduled Tasks
+or Unix cron.
+In other words, the open functionality of MOVEit Xfer
+allows users to build an automated collection of
+MOVEit DMZ transfer scripts with this utility.
+</p>
+
+<p>
+  <ul>
+    <li><a href="#othermoveitproducts_ez">Need more desktop automation?</a></li>
+    <li><a href="#othermoveitproducts_central">Need MISSION-CRITICAL automation?</a></li>
+    <li><a href="#othermoveitproducts_dmz">Need your own secure file transfer server?</a></li>
+  </ul>
+</p>
+
+<h2>Table of Contents</h2>
+<table width="100%">
+<tr>
+<td>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#commandline">Command Line</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#distribution">Distribution</a></li>
+<li><a href="#license">License</a></li>
+<li><a href="#contact">Contacting the Vendor</a></li>
+<li><a href="#othermoveitproducts">Other MOVEit Products</a></li>
+</ul>
+</td>
+</tr>
+</table>
+
+<h2>Requirements<a name="requirements"></a></h2>
+
+<p>On Windows, MOVEit Xfer is a standalone executable that does not require any other software,
+assuming the operating system is Microsoft Windows 98, ME, NT, 2000, XP, 2003, Vista, 7, or 8.
+On other operating systems, MOVEit Xfer requires Java 1.7 or higher.
+</p>
+
+<p>The Java version of MOVEit Xfer can also be run on Windows systems, but
+it's usually not necessary, even for testing, because MOVEit Xfer accepts the same commands under
+both native Windows and the Java runtime environment.
+</p>
+
+<p>All versions of MOVEit Xfer require the remote MOVEit DMZ server to be version 3.1.7 or higher.
+(Version 3.1.7 was released in Nov. 2004.)</p>
+
+<h2>Installation<a name="installation"></a></h2>
+
+<h3>Windows Installation</h3>
+
+<p>To install MOVEit Xfer, simply run the MOVEit Xfer for Windows installation package.  This package will ask into which folder and which "Start menu" program group you would like to install the application.  It will change your "PATH" variable to allow you to run MOVEit Xfer from any command prompt.  (You may be prompted to log off after the installation to allow this to occur.)  The installation will also install a "Start Menu" link to this documentation.</p>
+
+<p>The MOVEit Xfer for Windows installation package is also available in "MSI" format to aid mass-deployments.</p>
+
+<h3>Java Installation</h3>
+
+<p>To "install" MOVEit Xfer under Java, simply extract the contents of the MOVEit Xfer for Java archive file into a directory.
+To run MOVEit Xfer, you will either need to have a Java runtime executable in your command-line "executable path"
+or explicitly provide a path to that executable in the command line.</p>
+
+<p>It will probably be useful to use a short script or other helper to avoid
+making a user type the full path to either MOVEit Xfer or the Java executable each time
+he/she would like to use MOVEit Xfer.  Sample scripts for Windows and Unix platforms
+to carry out this task
+are provided in the MOVEit Xfer for Java package ("xfer.bat" and "xfer.sh").</p>
+
+
+
+
+<h2>Command Line<a name="commandline"></a></h2>
+
+<p>Use the following command syntax to run MOVEit Xfer:</p>
+
+<p><tt>xfer</tt> [args] [hostname]</p>
+
+<p>...where "args" consists of any (or none) of the following options:
+</p>
+
+<table>
+<tr>
+<td>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;</td>
+<td></td>
+</tr>
+<tr>
+  <td valign="top"><code>-?</code></td><td>Prints a list of command-line parameters.</td>
+</tr>
+<tr>
+  <td valign="top"><code>-d</code></td><td>Enables debug mode, which will output extra information to the console.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-s:</code>filename</td><td>Runs xfer in batch mode, using filename as a command file. The command file should contain the list of commands to be issued to
+      xfer, each command on its own line. Blank lines and lines starting with the # character will be ignored.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-user:</code>username</td><td>Identifies the username that xfer should use when connecting to the MOVEit DMZ server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-password:</code>password</td><td>Identifies the password that xfer should use when connecting to the MOVEit DMZ server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-proxyuser:</code>username</td><td>Identifies the username that xfer should use to authenticate to a proxy server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-proxypass:</code>password</td><td>Identifies the password that xfer should use to authenticate to a proxy server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-quiterror</code></td><td>Causes xfer to exit with error code 3 if an error occurs with any DMZ operation.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-z</code></td><td>Causes xfer to ignore any certificate issues with the MOVEit DMZ server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-t:</code>nsecs</td><td>Causes xfer to use nsecs for the receive data timeout (default = 60).</td>
+</tr>
+<tr>
+	<td valign="top"><code>-resumedelay:</code>mult</td><td>Causes xfer to pause when resuming a failed upload. This is to avoid timeouts where the server
+	is busy processing data up to the resume point. The amount of time delayed is dependent on the size of the partial file on the server. The base rate
+	(mult = 1) is roughly 10 secs per every 100 mb of data. This is can be increased by specifying a larger multiplier, i.e. mult = 2 means roughly 20sec/100mb,
+	mult = 3 means roughly 30sec/100mb, etc. The default is mult = 0, or no delay.</td>
+</tr>
+<tr>
+	<td colspan="2" valign="top">The Windows version adds these arguments.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-ccn:</code>common_name</td><td>Identifies the certificate to send to MOVEit
+      DMZ, by certificate common name. This applies only if client certificates are
+      being used. Xfer searches for the certificate in the Windows
+    certificate store.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-csha1:</code>SHA1_hex_hash</td><td>Identifies the certificate to send to MOVEit
+      DMZ, by SHA1 thumbprint, as a 40-digit hexadecimal number.&#160; For
+      instance, -csha1:2F1B50183045ECC55191BBD5A9F8410C2085E6FB.&#160; (The
+      thumbprint can be gotten from the Windows MMC Certificates snap-in.)&#160;
+      This applies only if client certificates are
+      being used.&#160; Do not specify both -ccn and -csha1; use one or the
+      other (or neither, if you are not using client certificates).&#160;</td>
+</tr>
+<tr>
+	<td valign="top"><code>-csn:</code>storename</td><td>Identifies the name of
+    the client certificate store; used only when using -ccn.&#160; This is
+    almost always My.&#160;</td>
+</tr>
+<tr>
+    <td colspan="2">The Java version adds these arguments. (Note: the Windows
+      version takes
+      proxy information from the current user's Internet Explorer configuration.)</td>
+</tr>
+<tr>
+	<td valign="top"><code>-proxyhost:</code>hostname</td><td>Identifies the hostname that xfer should use to access a proxy server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-proxyport:</code>portnum</td><td>Identifies the TCP port number of the proxy server.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-ccfile:</code>path</td><td>Identifies the filename
+      of a file containing client certificates, if client certificates are
+      being used.&#160;</td>
+</tr>
+<tr>
+	<td valign="top"><code>-cctype:</code>type</td><td>Identifies the type of
+      the -ccfile client certificate file (if any): PKCS12 for .pfx files (which
+      are the same as .p12 files), or JKS for Java keystore files.</td>
+</tr>
+<tr>
+	<td valign="top"><code>-ccpass:</code>password</td><td>Identifies the
+      password to the -ccfile client certificate file, if any.</td>
+</tr>
+
+</table>
+
+<p>hostname is the domain name or numeric IP address of the MOVEit DMZ server. </p>
+
+<p>If no hostname is given on the command line, MOVEit Xfer starts without a configured host.  In this case, you must issue an open command to connect to a MOVEit DMZ server.</p>
+
+<h3>Return Codes</h3>
+
+<p>The following integer values are returned by MOVEit Xfer based on how it exits.
+<ul>
+<li>0 : no error</li>
+<li>1 : command line parameter syntax error</li>
+<li>2 : command file does not exist</li>
+<li>3 : error occurred during a DMZ function and -quiterror is specified. This is the error code returned if a file transfer fails while the -quiterror option is enabled</li>
+</ul>
+</p>
+
+<h3>Compatibility with MOVEit Freely and Microsoft's "ftp.exe" Client</h3>
+
+<p>MOVEit Freely is a free, command-line FTP/SSL application also written and distributed by Ipswitch.
+The command-line syntax for MOVEit Xfer was based on existing MOVEit Freely command-line syntax.
+This uniformity allows people to convert most MOVEit Freely scripts to MOVEit Xfer scripts
+simply by replacing "ftps" with "xfer".
+</p>
+
+<p>MOVEit Freely command-line syntax was itself based on the command-line syntax of Microsoft's non-secure ftp.exe client.
+Once again, this uniformity allows people to convert many scripts based on "ftp.exe" to MOVEit Xfer scripts
+simply by replacing "ftp" with "xfer".
+</p>
+
+
+<h2>Commands<a name="commands"></a></h2>
+<p>Once MOVEit Xfer is started, it prompts for and reads single-line "FTP-style" commands.
+The commands are read from the console, or from the script filename supplied by using the -s parameter.</p>
+
+<p>If a command that has required parameters is entered without the parameters, MOVEit Xfer will prompt for the parameters.
+</p>
+
+<p>For many commands, to enter a parameter containing spaces,
+you must enclose the parameter in double quotes.
+For instance, to retrieve a file named My Document.txt,
+you should say get "My Document.txt".</p>
+
+<p>Legal commands are listed below.  Optional parameters are enclosed in brackets ([]).
+If you are familiar with FTP command syntax, there should be few surprises, as
+MOVEit Xfer's command syntax is entirely based on standard FTP command syntax.</p>
+
+<p><b>about</b><br/>
+Displays program information about MOVEit Xfer, the current version,
+and information about the system it is running under.</p>
+
+<p><b>cd <i>directory</i></b><br/>
+Changes the working directory on the server.</p>
+
+<p><b>close</b><br/>
+Closes the connection to the server without exiting the program.</p>
+
+<p><b>debug</b><br/>
+Toggles debug mode, which prints extra information to the console.</p>
+
+<p><b>delete <i>filename</i></b><br/>
+Deletes a filename on the DMZ server.</p>
+
+<p><b>dir <i>[filemask]</i></b><br/>
+Gets a directory listing from the DMZ server.</p>
+
+<p><b>exit</b><br/>
+Closes any open connection and exits the program.</p>
+
+<p><b>get <i>remotefilename [localfilename]</i></b><br/>
+Retrieves a file.  If localfilename is not specified, the file will be saved to the local system as remotefilename.  You may put " around the filenames in order to include spaces in the names.</p>
+
+<p><b>help</b><br/>
+Displays the list of commands accepted by MOVEit Xfer.</p>
+
+<p><b>lcd <i>directory</i></b><br/>
+Changes the local directory.</p>
+
+<p><b>ldir <i>[filemask]</i></b><br/>
+Gets a directory listing from the local system.</p>
+
+<p><b>lls <i>[filemask]</i></b><br/>
+Gets a short-form directory listing from the local system (names only).</p>
+
+<p><b>ls <i>[filemask]</i></b><br/>
+Gets a short-form directory listing from the DMZ server (names only).</p>
+
+<p><b>mdelete <i>remotefilemask</i></b><br/>
+Deletes multiple files from the remote system.  If not in batch mode,
+MOVEit Xfer prompts for whether to actually delete the file.
+The response should be "y" to delete the file, "n" to not delete the file,
+or "a" to delete the file and all others without asking again.</p>
+
+<p><b>mget <i>remotefilemask</i></b><br/>
+Retrieves multiple files from the remote system.
+If not in batch mode, MOVEit Xfer prompts for whether to actually
+download the file. The response should be "y" to download the file,
+"n" to not download the file, or "a" to download the file and all
+others without asking again.</p>
+
+<p><b>mkdir <i>remotedirectory</i></b><br/>
+Makes a directory on the remote system.</p>
+
+<p><b>mput <i>localfilemask [comments]</i></b><br/>
+Sends multiple files to the remote system.  If not in batch mode,
+MOVEit Xfer prompts for whether to actually upload the file.
+The response should be "y" to upload the file, "n" to not upload the file,
+or "a" to upload the file and all others without asking again.
+Comments should be surrounded by double-quotes (&quot;) if they contain spaces.</p>
+
+<p><b>open <i>[http:// | https://]hostname[:port][scriptpath]</i></b><br/>
+Sets the DMZ host to connect to. If the protocol prefix is not included,
+a secure connection will be assumed. Otherwise, MOVEit Xfer will use a
+secure connection for "https://" prefixes, and a non-secure connection for
+"http://" prefixes. The default secure connection port is 443, and the
+default non-secure connection port is 80. Either may be overridden by
+designating the port to use. The scriptpath must be included if the target
+DMZ application does not reside in the root of the host webserver.</p>
+
+<p>Example open commands:
+<ul>
+    <li>open moveit.Ipswitch.com - Set the host to moveit.Ipswitch.com. A secure connection will be attempted using port 443 to the root directory of the webserver.</li>
+    <li>open http://moveit.Ipswitch.com:8080 - Set the host to moveit.Ipswitch.com. A non-secure connection will be attempted using port 8080 to the root directory of the webserver.</li>
+    <li>open https://www.Ipswitch.com/moveit/ - Set the host to www.Ipswitch.com. A secure connection will be attempted using port 443 to the /moveit/ directory of the webserver. </li>
+</ul>
+</p>
+
+<p><b>pass <i>password</i></b><br/>
+Sets the password to be used when connecting to the DMZ host.
+This command should only be used in batch mode command files.</p>
+
+<p><b>prompt</b><br/>
+Toggles whether mget, mput, and mdelete prompt for each file.
+</p>
+
+<p><b>put <i>localfilename [remotefilename [comments]]</i></b><br/>
+Sends a file to a remote DMZ server.  If remotefilename is not specified,
+the name of the file on the remote  system will be the same as localfilename.
+You may put " around the filenames in order to include spaces in the names.
+Comments should also be surrounded by double-quotes (&quot;) if they contain spaces.</p>
+
+<p><b>pwd</b><br/>
+Displays the current directory on the remote DMZ system if connected,
+as well as the current directory on the local system.</p>
+
+<p><b>rename <i>oldfilename newfilename</i></b><br/>
+Renames a file on the remote system.</p>
+
+<p><b>rmdir <i>remotedirectory</i></b><br/>
+Removes a directory on the remote system.</p>
+
+<p><b>user <i>[username [password]]</i></b><br/>
+Sets the username and password to be used when connecting to the DMZ host.
+If no password is provided and the program is not in batch mode,
+MOVEit Xfer will prompt for a password.
+If neither the username or the password are provided and the program is not
+in batch mode, MOVEit Xfer will prompt for both the username and the password.</p>
+
+<h2>Examples<a name="examples"></a></h2>
+
+<h3>Simple Script Example</h3>
+
+<p>The following script and command line retrieve all files named *.rpt
+from the Incoming directory of a DMZ server.
+The command line is:</p>
+
+<p><blockquote><pre>xfer -s:GetRpt.in moveit.bigcorp.com</pre></blockquote>
+</p>
+
+<p>The contents of GetRpt.in are:</p>
+
+<p><blockquote><pre>
+jsmith
+secret123
+cd Incoming
+mget *.rpt
+quit
+</pre></blockquote>
+</p>
+
+<p>Note that the lines in the script are simply the lines of text that would be entered by the user if the transfer were done interactively rather than via a script. Also note that the script did NOT need to include the "Y" or "N" responses a user would normally see if typing in an "mget" or "mput" command manually; during batch mode, xfer assumes the answer to these questions would be "Y."</p>
+
+<h3>Simple Batch File to Upload a Single File</h3>
+
+<p>The following batch file lets a user upload a single file using a single command.
+If you save the following snippet as "uploadit.bat", usage would be:
+"uploadit (hostname) (username) (password) (file_to_transfer)"</p>
+
+<p><blockquote><pre>
+echo put %4 &gt; temp.txt
+echo quit &gt;&gt; temp.txt
+xfer -user:%2 -password:%3 -s:temp.txt %1
+del temp.txt
+</pre></blockquote>
+</p>
+
+<h2><a name='BatchFilethatChecksforErrors'>Batch File that Checks for Errors</a></h2>
+
+<p>This batch file checks the exit code from MOVEit Xfer to see if any errors occurred.&#160; The
+-quiterror parameter will make the program exit as soon as there is an error without reading any more
+commands from the script file.
+</p>
+
+<p><blockquote>
+<pre>xfer -user:dave -password:super -quiterror -s:script.txt moveit.bigcorp.com
+if %ERRORLEVEL%==0 goto great
+echo MOVEit Xfer returned error code: %ERRORLEVEL%
+if %ERRORLEVEL%==3 goto out
+if %ERRORLEVEL% GEQ 1 goto oops
+echo Unknown File Transfer Problem
+goto done
+:oops
+echo Error in File Transfer syntax
+goto done
+:out
+echo An error occurred in the File Transfer
+goto done
+:great
+echo The File Transfer completed successfully
+:done
+</pre>
+</blockquote>
+</p>
+
+
+
+
+<h2>Distribution<a name="distribution"></a></h2>
+
+<h3>Distribution Under Windows</h3>
+
+<p>Under Windows, the standard MOVEit Xfer for Windows
+installation packages will automatically
+set the "PATH" variable to include the folder into which MOVEit Xfer was
+installed.  This allows users to invoke the MOVEit Xfer client
+from any command line prompt.  You should use the standard MOVEit Xfer for Windows
+installation packages for distribution if your clients:
+<ul>
+  <li>are using Windows, AND...</li>
+  <li>will write their own scripts OR are replacing existing FTP client scripts.</li>
+</ul>
+</p>
+
+<p>There are "MSI" and "EXE" versions of the MOVEit Xfer for Windows installation packages.
+In most cases you should use the "EXE" version as upgrading MSI packages can
+require end users to perform some extra steps.  If you need to support
+Windows 98 or want to <a href="#rollyourown">roll your own distribution</a>, you may want to
+use the basic archive file (in "zip" format) instead.
+</p>
+
+<h3>Distribution Under Java</h3>
+
+<p>Under Java, the standard MOVEit Xfer for Java package
+is an archive file (in "zip" and "tar.gz" format)
+that contains the MOVEit Xfer software and documentation.
+You should the standard MOVEit Xfer for Java
+archive package for distribution if your clients:
+<ul>
+  <li>are using Java, AND...</li>
+  <li>will write their own scripts or are replacing existing FTP client scripts.</li>
+</ul>
+</p>
+
+<h3><a name="rollyourown">USB-Friendly "Portable" Deployment</a></h3>
+
+<p><i>"A portable app is a computer program that you can carry around with you on a
+portable device and use on any Windows computer. When your USB thumbdrive,
+portable hard drive, iPod or other portable device is plugged in, you have
+access to your software and personal data just as you would on your own PC.
+And when you unplug, none of your personal data is left behind."</i>
+(Rare Ideas, LLC, 2005)</p>
+
+<p>MOVEit Xfer can be deployed/installed as a USB-Friendly "Portable" application.
+Simply copy the contents of a MOVEit Xfer archive file (e.g., "MOVEitXfer.zip")
+into a folder on your USB drive or other portable device.
+</p>
+
+<p>With command line
+      applications, MOVEit Xfer included, your personal information is
+      generally confined to what you have written in batch files or piped out
+      into log files.  Please remember to keep any such batch or log files on
+      the portable drive too.</p>
+
+<p>
+You may wish to add the portable directory in which you installed MOVEit Xfer
+to your PATH if you want to be able to invoke MOVEit Xfer from any folder
+without specifying a full path to the executable.  If you often find yourself
+running command-line applications in a portable environment, you will also
+probably want to create a portable "Launch Command Line" shortcut and/or batch
+file on your portable device so your favorite utilities are always available
+in command-line sessions.
+</p>
+
+<h3><a name="rollyourown">Custom Distribution</a></h3>
+
+<p>If you elect to roll your own distribution of MOVEit Xfer, you MUST include:
+  <ul>
+    <li>THIS DOCUMENT (or at least the LICENSE section of this document), AND...</li>
+    <li>xfer.exe (for Windows clients), AND/OR...</li>
+    <li>xfer.jar (for Java clients)</li>
+  </ul>
+</p>
+
+<p>You will also probably want to include any custom batch files, script input files and/or documentation
+in your own distribution.  Usually all these files are placed into a single "archive"
+file (e.g., a "zip" file), but they may be bundled in other distributions
+as permitted by the license found in this document.</p>
+
+
+
+<h2><a name="othermoveitproducts">Other MOVEit Products</a></h2>
+
+<h3><a name="othermoveitproducts_ez">Need more desktop automation?</a></h3>
+
+<p>You can automate MOVEit Xfer by running a batch file to power it from the operating system's scheduler.
+However, if you would like to provide a "friendlier" automated client to your Windows users, you may want to examine <b>MOVEit EZ</b>.
+The MOVEit EZ client runs as an icon in your Windows system tray and automatically moves files back and forth between a local filesystem and a MOVEit DMZ server, and includes features MOVEit Xfer does not have such as automatic retry, logging and a GUI configuration interface.
+(<a href="http://www.ipswitchft.com/moveitez" target="_blank">More info...</a>)</p>
+
+<h3><a name="othermoveitproducts_central">Need MISSION-CRITICAL automation?</a></h3>
+
+<p>If you run more than 10 automated MOVEit Xfer transfers or need mission-critical automated file-transfer,
+please consider using <b>MOVEit Central</b> instead of MOVEit Xfer.
+MOVEit Central is a fully-automated, schedule and event driven file transfer engine.
+It can move files between FTP servers, SSH servers, Windows file shares, email servers and comes with enterprise features such as remote control, task configuration/execution delegation, and automatic retry/resume of failed transfers.
+(<a href="http://www.ipswitchft.com/moveitcentral" target="_blank">More info...</a>)</p>
+
+<h3><a name="othermoveitproducts_dmz">Need your own secure file transfer server?</a></h3>
+
+<p>The first Windows-based secure file transfer server to support all three modes of FTP over SSL, the first to add SSH support, and the first one to support both protocols plus browser-based (HTTPS) transfers was <b>MOVEit DMZ</b>. In addition to three secure IN TRANSIT protocols, MOVEit DMZ features integrated FIPS-140-validated AT REST encryption to protect files while they are stored on the server. Request an evalution and join the banks, governments, hospitals and others who have stepped up to MOVEit secure file transfer today!
+(<a href="http://www.ipswitchft.com/moveitdmz" target="_blank">More info...</a>)</p>
+
+<h2><a name="license">MOVEit Xfer LICENSE</a></h2>
+
+
+<p><font size="-2">
+MOVEit Xfer is protected by copyright laws and international copyright treaties, as well as other intellectual property laws and treaties. MOVEit Xfer is licensed, not sold.
+"MOVEit" is a registered trademark of Ipswitch, Inc.
+</font></p>
+
+<p><font size="-2">
+1. GRANT OF LICENSE. This license agreement grants you the following rights:
+</font></p>
+
+<p><font size="-2">
+Installation and Use. You may install and use MOVEit Xfer for your personal or company use. There is no charge for such use.  You may also make copies of MOVEit Xfer for backup and archival purposes.
+</font></p>
+
+<p><font size="-2">
+Distribution. You may make unlimited copies of and may distribute to any party the original MOVEit Xfer installation package as long as such distribution is performed without charge. You may reproduce or distribute components of the product (e.g., just "xfer.exe") as long as this license agreement accompanies the software.
+</font></p>
+
+<p><font size="-2">
+2. DESCRIPTION OF OTHER RIGHTS AND LIMITATIONS.
+</font></p>
+
+<p><font size="-2">
+Limitations on Reverse Engineering, Decompilation, and Disassembly. You may not reverse engineer, decompile, or disassemble MOVEit Xfer, except and only to the extent that such activity is expressly permitted by applicable law notwithstanding this limitation.
+</font></p>
+
+<p><font size="-2">
+Software Transfer. You may not transfer your rights under this license agreement.
+</font></p>
+
+<p><font size="-2">
+Termination. Without prejudice to any other rights, Ipswitch, Inc. may terminate this license agreement if you fail to comply with the terms and conditions of this license agreement. In such event, you must destroy all copies of MOVEit Xfer and all of its component parts.
+</font></p>
+
+<p><font size="-2">
+Rental. You may not sell, rent, or lease MOVEit Xfer.
+</font></p>
+
+<p><font size="-2">
+3. COPYRIGHT. All title and copyrights in and to MOVEit Xfer, the accompanying printed materials, and any copies of MOVEit Xfer are owned by Ipswitch, Inc.  MOVEit Xfer is protected by copyright laws and international treaty provisions. Therefore, you must treat MOVEit Xfer like any other copyrighted material.
+</font></p>
+
+<p><font size="-2">
+WARRANTY AND LIMITATION OF LIABILITY
+</font></p>
+
+<p><font size="-2">
+WARRANTY. MOVEit Xfer is distributed on an "as is" basis with no warranty, either expressed or implied.
+</font></p>
+
+<p><font size="-2">
+OTHER WARRANTIES. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IPSWITCH, INC. AND ITS SUPPLIERS DISCLAIM ALL OTHER WARRANTIES AND CONDITIONS, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT, WITH REGARD TO MOVEit Xfer, AND THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES. THIS LIMITED WARRANTY GIVES YOU SPECIFIC LEGAL RIGHTS. YOU MAY HAVE OTHERS, WHICH VARY FROM STATE/JURISDICTION TO STATE/JURISDICTION.
+</font></p>
+
+<p><font size="-2">
+LIMITATION OF LIABILITY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL IPSWITCH, INC. OR ITS SUPPLIERS BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES WHATSOEVER (INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS, BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER PECUNIARY LOSS) ARISING OUT OF THE USE OF OR INABILITY TO USE MOVEit Xfer OR THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES, EVEN IF IPSWITCH, INC. HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, IPSWITCH, INC.'S ENTIRE LIABILITY UNDER ANY PROVISION OF THIS EULA SHALL BE LIMITED TO THE GREATER OF THE AMOUNT ACTUALLY PAID BY YOU FOR MOVEit Xfer OR U.S.$5.00; PROVIDED, HOWEVER, IF YOU HAVE ENTERED INTO A IPSWITCH, INC. SUPPORT SERVICES AGREEMENT, IPSWITCH, INC.'S ENTIRE LIABILITY REGARDING SUPPORT SERVICES SHALL BE GOVERNED BY THE TERMS OF THAT AGREEMENT. BECAUSE SOME STATES AND JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY, THE ABOVE LIMITATION MAY NOT APPLY TO YOU.
+</font></p>
+
+<p><font size="-2">
+TRADEMARKS. MOVEit is a registered trademark of Ipswitch, Inc. All names of products and companies used in this document, the software, or the enclosed documentation may be trademarks of their corresponding owners. Their use in this document is intended to be in compliance with the respective guidelines and licenses.
+</font></p>
+
+
+<h2>Contacting the Vendor<a name="contact"></a></h2>
+
+
+<table>
+<tr>
+<td><b>Information site: &#160;</b></td>
+<td><a href="http://www.ipswitchft.com">http://www.ipswitchft.com</a> </td>
+</tr>
+<tr>
+<td><b>Support site:</b></td>
+<td><a href="http://my.ipswitchft.com">http://my.ipswitchft.com</a> </td>
+</tr>
+</table>
+</body>
+</html>
