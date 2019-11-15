@@ -16,6 +16,7 @@ module.exports = function(args) {
     args.options["aws-secret-access-key"] || process.env.AWS_SECRET_ACCESS_KEY
   const concurrency =
     args.options["concurrency"] || process.env.CONCURRENCY || 10
+  const queue = require("async/queue")
 
   const AWS = require("aws-sdk")
   AWS.config.update({
@@ -86,9 +87,30 @@ module.exports = function(args) {
         if (code !== 0) {
           throw new Error(`xfer exit code ${code}`)
         }
+        const q = queue((file, cb) => {
+          s3.upload(
+            {
+              Bucket: s3Bucket,
+              Key: s3PathPrefix + `/${file}`,
+              Body: fs.createReadStream(path.join(__dirname, tmpDir, file))
+            },
+            function(err, data) {
+              if (err) {
+                console.error(`error uploading file ${file}: ${err}`)
+                return cb(err)
+              }
+              // todo: delete the file in tmpDir
+              // todo: delete the file in Sfts
+              return cb()
+            }
+          )
+        }, concurrency)
+        q.drain(() => {
+          console.info("finished uploading to s3")
+        })
         let files = []
         walkSync(tmpDir, files)
-        console.log(files)
+        q.push(files)
       })
     } catch (ex) {
       console.error(`error downloading files: ${ex}`)
