@@ -67,14 +67,14 @@ module.exports = function(args) {
       )
       xfer.stdin.setEncoding("utf-8")
       xfer.stdout.once("data", data => {
-        console.log(data)
+        console.info(data)
         xfer.stdin.write(`cd ${sftsFolder}` + "\n")
         xfer.stdout.once("data", data => {
           xfer.stdin.write("prompt\n")
           xfer.stdout.once("data", data => {
             xfer.stdin.write("mget *\n")
             xfer.stdout.once("data", data => {
-              console.log(data)
+              console.info(data)
               xfer.stdin.end("quit\n")
             })
           })
@@ -99,7 +99,8 @@ module.exports = function(args) {
                 console.error(`error uploading file ${file}: ${err}`)
                 return cb(err)
               }
-              // todo: delete the file in tmpDir
+              // delete the file in tmpDir
+              fs.unlinkSync(path.join(__dirname, tmpDir, file))
               // todo: delete the file in Sfts
               return cb()
             }
