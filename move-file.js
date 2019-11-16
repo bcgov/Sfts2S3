@@ -3,11 +3,14 @@ module.exports = function(args) {
   const path = require("path")
   const tmpDir = "tmp"
   const rimraf = require("rimraf")
-  const sftsHost = args.options["sfts-host"] || process.env.SFTS_HOST
+  const sftsHost =
+    args.options["sfts-host"] ||
+    process.env.SFTS_HOST ||
+    "filetransfer.gov.bc.ca"
   const sftsUser = args.options["sfts-user"] || process.env.SFTS_USER
   const sftsPassword =
     args.options["sfts-password"] || process.env.SFTS_PASSWORD
-  const sftsFolder = args.options["sfts-folder"] || process.env.SFTS_FOLDER
+  const sftsFolder = args.options["sfts-folder"] || process.env.SFTS_FOLDER||'/'
   const s3Bucket = args.options["s3-bucket"] || process.env.S3_BUCKET
   const s3PathPrefix =
     args.options["s3-path-prefix"] || process.env.S3_PATH_PREFIX

@@ -1,9 +1,9 @@
 const getOpt = require('node-getopt')
     .create([
-        ['s', 'sfts-host=<string>', 'sfts host'],
-        ['u', 'sfts-user=<string>', 'sfts login user name'],
-        ['p', 'sfts-password=<string>', 'sfts login password'],
-        ['f', 'sfts-folder=<string>', 'sfts folder'],
+        ['s', 'sfts-host=<string>', 'SFTS host'],
+        ['u', 'sfts-user=<string>', 'SFTS login user name'],
+        ['p', 'sfts-password=<string>', 'SFTS login password'],
+        ['f', 'sfts-folder=<string>', 'SFTS folder'],
         ['b', 's3-bucket=<string>', 's3 bucket'],
         ['r', 's3-path-prefix=<string>', 's3 path prefix'],
         ['a', 'aws-access-key-id=<string>', 'aws access key id'],
