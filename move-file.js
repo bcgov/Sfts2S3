@@ -2,6 +2,7 @@ module.exports = function(args) {
   const fs = require("fs")
   const path = require("path")
   const tmpDir = "tmp"
+  const rimraf = require("rimraf")
   const sftsHost = args.options["sfts-host"] || process.env.SFTS_HOST
   const sftsUser = args.options["sfts-user"] || process.env.SFTS_USER
   const sftsPassword =
@@ -67,14 +68,12 @@ module.exports = function(args) {
       )
       xfer.stdin.setEncoding("utf-8")
       xfer.stdout.once("data", data => {
-        console.info(data)
         xfer.stdin.write(`cd ${sftsFolder}` + "\n")
         xfer.stdout.once("data", data => {
           xfer.stdin.write("prompt\n")
           xfer.stdout.once("data", data => {
             xfer.stdin.write("mget *\n")
             xfer.stdout.once("data", data => {
-              console.info(data)
               xfer.stdin.end("quit\n")
             })
           })
@@ -87,6 +86,7 @@ module.exports = function(args) {
         if (code !== 0) {
           throw new Error(`xfer exit code ${code}`)
         }
+        console.info("files downloaded")
         const q = queue((file, cb) => {
           s3.upload(
             {
@@ -99,19 +99,53 @@ module.exports = function(args) {
                 console.error(`error uploading file ${file}: ${err}`)
                 return cb(err)
               }
-              // delete the file in tmpDir
-              fs.unlinkSync(path.join(__dirname, tmpDir, file))
-              // todo: delete the file in Sfts
+              console.info(`uploaded file ${file}`)
               return cb()
             }
           )
         }, concurrency)
         q.drain(() => {
-          console.info("finished uploading to s3")
+          // delete the files in tmpDir
+          rimraf.sync(path.join(__dirname, tmpDir))
+          // delete the files in Sfts
+          const xfer = spawn("java", [
+            "-classpath",
+            `${path.join(__dirname, "xfer", "xfer.jar")}${
+              path.delimiter
+            }${path.join(__dirname, "xfer", "jna.jar")}`,
+            "xfer",
+            `-user:${sftsUser}`,
+            `-password:${sftsPassword}`,
+            sftsHost
+          ])
+          xfer.stdin.setEncoding("utf-8")
+          xfer.stdout.once("data", data => {
+            xfer.stdin.write(`cd ${sftsFolder}` + "\n")
+            xfer.stdout.once("data", data => {
+              xfer.stdin.write("prompt\n")
+              xfer.stdout.once("data", data => {
+                xfer.stdin.write("mdelete *\n")
+                xfer.stdout.once("data", data => {
+                  xfer.stdin.end("quit\n")
+                })
+              })
+            })
+          })
+          xfer.on("close", code => {
+            if (code !== 0) {
+              throw new Error("error delete files from sfts")
+            }
+            console.info("files deleted from source")
+            console.info("finished processing")
+          })
         })
         let files = []
         walkSync(tmpDir, files)
-        q.push(files)
+        q.push(files, err => {
+          if (err) {
+            throw new Error(err)
+          }
+        })
       })
     } catch (ex) {
       console.error(`error downloading files: ${ex}`)
