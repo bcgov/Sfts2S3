@@ -50,10 +50,8 @@ module.exports = function(args) {
     return filelist
   }
 
-  async function lsSfts() {
+  async function goToSftsFolder() {
     return new Promise((resolve, reject) => {
-      let output = '',
-        firstOutput = true
       const xfer = spawn(
         'java',
         [
@@ -73,15 +71,27 @@ module.exports = function(args) {
       xfer.stdout.once('data', () => {
         xfer.stdin.write(`cd ${sftsFolder}` + '\n')
         xfer.stdout.once('data', () => {
-          xfer.stdin.write('ls\n')
-          xfer.stdout.on('readable', () => {
-            output += xfer.stdout.read()
-            if (firstOutput) {
-              firstOutput = false
-              xfer.stdin.end('quit\n')
-            }
-          })
+          resolve(xfer)
         })
+      })
+      xfer.stderr.once('data', data => {
+        reject(data)
+      })
+    })
+  }
+
+  function lsSfts() {
+    return new Promise(async (resolve, reject) => {
+      const xfer = await goToSftsFolder()
+      let output = '',
+        firstOutput = true
+      xfer.stdin.write('ls\n')
+      xfer.stdout.on('readable', () => {
+        output += xfer.stdout.read()
+        if (firstOutput) {
+          firstOutput = false
+          xfer.stdin.end('quit\n')
+        }
       })
       xfer.stderr.on('data', data => {
         reject(data)
@@ -99,17 +109,62 @@ module.exports = function(args) {
     })
   }
 
+  function downloadFile(fileName) {
+    return new Promise(async (resolve, reject) => {
+      const xfer = await goToSftsFolder()
+      xfer.stdin.write(`get ${fileName}` + '\n')
+      xfer.stdout.once('data', data => {
+        xfer.stdin.end('quit\n')
+      })
+      xfer.stderr.on('data', data => {
+        reject(data)
+      })
+      xfer.on('close', code => {
+        if (code !== 0) {
+          return reject(code)
+        }
+        resolve()
+      })
+    })
+  }
+
   return async function() {
     console.info('started processing')
     try {
       if (!fs.existsSync(tmpDir)) {
         fs.mkdirSync(tmpDir)
       }
-      let data = await lsSfts()
-      console.log(data)
-      const xfer = spawn(
-        'java',
-        [
+      let files = await lsSfts()
+      for (const fn of files) {
+        try {
+          await downloadFile(fn)
+          console.info(`file ${fn} downloaded`)
+        } catch (ex) {
+          console.error(`file ${fn} download failed`)
+        }
+      }
+      const q = queue((file, cb) => {
+        s3.upload(
+          {
+            Bucket: s3Bucket,
+            Key: s3PathPrefix + `/${file}`,
+            Body: fs.createReadStream(path.join(__dirname, tmpDir, file))
+          },
+          function(err, data) {
+            if (err) {
+              console.error(`error uploading file ${file}: ${err}`)
+              return cb(err)
+            }
+            console.info(`uploaded file ${file}`)
+            return cb()
+          }
+        )
+      }, concurrency)
+      q.drain(() => {
+        // delete the files in tmpDir
+        rimraf.sync(path.join(__dirname, tmpDir))
+        // delete the files in Sfts
+        const xfer = spawn('java', [
           '-classpath',
           `${path.join(__dirname, 'xfer', 'xfer.jar')}${
             path.delimiter
@@ -118,89 +173,34 @@ module.exports = function(args) {
           `-user:${sftsUser}`,
           `-password:${sftsPassword}`,
           sftsHost
-        ],
-        { cwd: path.join(__dirname, tmpDir) }
-      )
-      xfer.stdin.setEncoding('utf-8')
-      xfer.stdout.once('data', data => {
-        xfer.stdin.write(`cd ${sftsFolder}` + '\n')
+        ])
+        xfer.stdin.setEncoding('utf-8')
         xfer.stdout.once('data', data => {
-          xfer.stdin.write('prompt\n')
+          xfer.stdin.write(`cd ${sftsFolder}` + '\n')
           xfer.stdout.once('data', data => {
-            xfer.stdin.write('mget *\n')
+            xfer.stdin.write('prompt\n')
             xfer.stdout.once('data', data => {
-              xfer.stdin.end('quit\n')
-            })
-          })
-        })
-      })
-      xfer.stderr.on('data', data => {
-        throw new Error(data)
-      })
-      xfer.on('close', code => {
-        if (code !== 0) {
-          throw new Error(`xfer exit code ${code}`)
-        }
-        console.info('files downloaded')
-        const q = queue((file, cb) => {
-          s3.upload(
-            {
-              Bucket: s3Bucket,
-              Key: s3PathPrefix + `/${file}`,
-              Body: fs.createReadStream(path.join(__dirname, tmpDir, file))
-            },
-            function(err, data) {
-              if (err) {
-                console.error(`error uploading file ${file}: ${err}`)
-                return cb(err)
-              }
-              console.info(`uploaded file ${file}`)
-              return cb()
-            }
-          )
-        }, concurrency)
-        q.drain(() => {
-          // delete the files in tmpDir
-          rimraf.sync(path.join(__dirname, tmpDir))
-          // delete the files in Sfts
-          const xfer = spawn('java', [
-            '-classpath',
-            `${path.join(__dirname, 'xfer', 'xfer.jar')}${
-              path.delimiter
-            }${path.join(__dirname, 'xfer', 'jna.jar')}`,
-            'xfer',
-            `-user:${sftsUser}`,
-            `-password:${sftsPassword}`,
-            sftsHost
-          ])
-          xfer.stdin.setEncoding('utf-8')
-          xfer.stdout.once('data', data => {
-            xfer.stdin.write(`cd ${sftsFolder}` + '\n')
-            xfer.stdout.once('data', data => {
-              xfer.stdin.write('prompt\n')
+              xfer.stdin.write('mdelete *\n')
               xfer.stdout.once('data', data => {
-                xfer.stdin.write('mdelete *\n')
-                xfer.stdout.once('data', data => {
-                  xfer.stdin.end('quit\n')
-                })
+                xfer.stdin.end('quit\n')
               })
             })
           })
-          xfer.on('close', code => {
-            if (code !== 0) {
-              throw new Error('error delete files from sfts')
-            }
-            console.info('files deleted from source')
-            console.info('finished processing')
-          })
         })
-        let files = []
-        walkSync(tmpDir, files)
-        q.push(files, err => {
-          if (err) {
-            throw new Error(err)
+        xfer.on('close', code => {
+          if (code !== 0) {
+            throw new Error('error delete files from sfts')
           }
+          console.info('files deleted from source')
+          console.info('finished processing')
         })
+      })
+      files = []
+      walkSync(tmpDir, files)
+      q.push(files, err => {
+        if (err) {
+          throw new Error(err)
+        }
       })
     } catch (ex) {
       console.error(`error downloading files: ${ex}`)
