@@ -102,7 +102,7 @@ module.exports = function(args) {
         }
         output = output.split('\n').slice(0, -1)
         if (output.length > 0) {
-          output = output.map(v => v.trim())
+          output = output.reduce((v, e) => ((v[e.trim()] = {}), v), {})
         }
         resolve(output)
       })
@@ -128,6 +128,44 @@ module.exports = function(args) {
     })
   }
 
+  function renameFile(fileName, newName) {
+    return new Promise(async (resolve, reject) => {
+      const xfer = await goToSftsFolder()
+      xfer.stdin.write(`rename ${fileName} ${newName}` + '\n')
+      xfer.stdout.once('data', () => {
+        xfer.stdin.end('quit\n')
+      })
+      xfer.stderr.on('data', data => {
+        reject(data)
+      })
+      xfer.on('close', code => {
+        if (code !== 0) {
+          return reject(code)
+        }
+        resolve()
+      })
+    })
+  }
+
+  function deleteFile(fileName) {
+    return new Promise(async (resolve, reject) => {
+      const xfer = await goToSftsFolder()
+      xfer.stdin.write(`delete  ${fileName}` + '\n')
+      xfer.stdout.once('data', () => {
+        xfer.stdin.end('quit\n')
+      })
+      xfer.stderr.on('data', data => {
+        reject(data)
+      })
+      xfer.on('close', code => {
+        if (code !== 0) {
+          return reject(code)
+        }
+        resolve()
+      })
+    })
+  }
+  
   return async function() {
     console.info('started processing')
     try {
@@ -135,12 +173,13 @@ module.exports = function(args) {
         fs.mkdirSync(tmpDir)
       }
       let files = await lsSfts()
-      for (const fn of files) {
+      for (const fn of Object.keys(files)) {
         try {
           await downloadFile(fn)
           console.info(`file ${fn} downloaded`)
         } catch (ex) {
           console.error(`file ${fn} download failed`)
+          files[fn].downloaded = false
         }
       }
       const q = queue((file, cb) => {
