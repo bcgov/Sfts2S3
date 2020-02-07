@@ -34,22 +34,6 @@ module.exports = function(args) {
 
   const { spawn } = require('child_process')
 
-  const tmpDirRegex = new RegExp('^' + tmpDir + '/')
-  function walkSync(dir, filelist) {
-    let files = fs.readdirSync(dir)
-    filelist = filelist || []
-    files.forEach(function(file) {
-      if (fs.statSync(path.join(dir, file)).isDirectory()) {
-        filelist = walkSync(path.join(dir, file), filelist)
-      } else {
-        filelist.push(
-          (dir.replace(/\\/g, '/') + '/').replace(tmpDirRegex, '') + file
-        )
-      }
-    })
-    return filelist
-  }
-
   async function goToSftsFolder() {
     return new Promise((resolve, reject) => {
       const xfer = spawn(
@@ -165,7 +149,7 @@ module.exports = function(args) {
       })
     })
   }
-  
+
   return async function() {
     console.info('started processing')
     try {
@@ -234,9 +218,13 @@ module.exports = function(args) {
           console.info('finished processing')
         })
       })
-      files = []
-      walkSync(tmpDir, files)
-      q.push(files, err => {
+      const downloadedFiles = Object.keys(files).reduce((a, v) => {
+        if (files[v].downloaded !== false) {
+          a.push(v)
+          return a
+        }
+      }, [])
+      q.push(downloadedFiles, err => {
         if (err) {
           throw new Error(err)
         }
