@@ -35,7 +35,7 @@ module.exports = function(args) {
   const { spawn } = require('child_process')
 
   const tmpDirRegex = new RegExp('^' + tmpDir + '/')
-  let walkSync = function(dir, filelist) {
+  function walkSync(dir, filelist) {
     let files = fs.readdirSync(dir)
     filelist = filelist || []
     files.forEach(function(file) {
@@ -50,12 +50,63 @@ module.exports = function(args) {
     return filelist
   }
 
+  async function lsSfts() {
+    return new Promise((resolve, reject) => {
+      let output = '',
+        firstOutput = true
+      const xfer = spawn(
+        'java',
+        [
+          '-classpath',
+          `${path.join(__dirname, 'xfer', 'xfer.jar')}${
+            path.delimiter
+          }${path.join(__dirname, 'xfer', 'jna.jar')}`,
+          'xfer',
+          `-user:${sftsUser}`,
+          `-password:${sftsPassword}`,
+          sftsHost
+        ],
+        { cwd: path.join(__dirname, tmpDir) }
+      )
+      xfer.stdin.setEncoding('utf-8')
+      xfer.stdout.setEncoding('utf-8')
+      xfer.stdout.once('data', () => {
+        xfer.stdin.write(`cd ${sftsFolder}` + '\n')
+        xfer.stdout.once('data', () => {
+          xfer.stdin.write('ls\n')
+          xfer.stdout.on('readable', () => {
+            output += xfer.stdout.read()
+            if (firstOutput) {
+              firstOutput = false
+              xfer.stdin.end('quit\n')
+            }
+          })
+        })
+      })
+      xfer.stderr.on('data', data => {
+        reject(data)
+      })
+      xfer.on('close', code => {
+        if (code !== 0) {
+          return reject(code)
+        }
+        output = output.split('\n').slice(0, -1)
+        if (output.length > 0) {
+          output = output.map(v => v.trim())
+        }
+        resolve(output)
+      })
+    })
+  }
+
   return async function() {
     console.info('started processing')
     try {
       if (!fs.existsSync(tmpDir)) {
         fs.mkdirSync(tmpDir)
       }
+      let data = await lsSfts()
+      console.log(data)
       const xfer = spawn(
         'java',
         [
