@@ -1,4 +1,4 @@
-module.exports = function(args) {
+module.exports = function (args) {
   const fs = require('fs')
   const path = require('path')
   const tmpDir = 'tmp'
@@ -26,10 +26,10 @@ module.exports = function(args) {
   const AWS = require('aws-sdk')
   AWS.config.update({
     accessKeyId: awsAccessKeyId,
-    secretAccessKey: awsSecretAccessKey
+    secretAccessKey: awsSecretAccessKey,
   })
   const s3 = new AWS.S3({
-    apiVersion: '2019-11-13'
+    apiVersion: '2019-11-13',
   })
 
   const { spawn } = require('child_process')
@@ -46,7 +46,7 @@ module.exports = function(args) {
           'xfer',
           `-user:${sftsUser}`,
           `-password:${sftsPassword}`,
-          sftsHost
+          sftsHost,
         ],
         { cwd: path.join(__dirname, tmpDir) }
       )
@@ -58,7 +58,7 @@ module.exports = function(args) {
           resolve(xfer)
         })
       })
-      xfer.stderr.once('data', data => {
+      xfer.stderr.once('data', (data) => {
         reject(data)
       })
     })
@@ -77,10 +77,10 @@ module.exports = function(args) {
           xfer.stdin.end('quit\n')
         }
       })
-      xfer.stderr.on('data', data => {
+      xfer.stderr.on('data', (data) => {
         reject(data)
       })
-      xfer.on('close', code => {
+      xfer.on('close', (code) => {
         if (code !== 0) {
           return reject(code)
         }
@@ -97,13 +97,13 @@ module.exports = function(args) {
     return new Promise(async (resolve, reject) => {
       const xfer = await goToSftsFolder()
       xfer.stdin.write(`get ${fileName}` + '\n')
-      xfer.stdout.once('data', data => {
+      xfer.stdout.once('data', (data) => {
         xfer.stdin.end('quit\n')
       })
-      xfer.stderr.on('data', data => {
+      xfer.stderr.on('data', (data) => {
         reject(data)
       })
-      xfer.on('close', code => {
+      xfer.on('close', (code) => {
         if (code !== 0) {
           return reject(code)
         }
@@ -119,10 +119,10 @@ module.exports = function(args) {
       xfer.stdout.once('data', () => {
         xfer.stdin.end('quit\n')
       })
-      xfer.stderr.on('data', data => {
+      xfer.stderr.on('data', (data) => {
         reject(data)
       })
-      xfer.on('close', code => {
+      xfer.on('close', (code) => {
         if (code !== 0) {
           return reject(code)
         }
@@ -138,10 +138,10 @@ module.exports = function(args) {
       xfer.stdout.once('data', () => {
         xfer.stdin.end('quit\n')
       })
-      xfer.stderr.on('data', data => {
+      xfer.stderr.on('data', (data) => {
         reject(data)
       })
-      xfer.on('close', code => {
+      xfer.on('close', (code) => {
         if (code !== 0) {
           return reject(code)
         }
@@ -150,7 +150,7 @@ module.exports = function(args) {
     })
   }
 
-  return async function() {
+  return async function () {
     console.info('started processing')
     try {
       if (!fs.existsSync(tmpDir)) {
@@ -171,9 +171,9 @@ module.exports = function(args) {
           {
             Bucket: s3Bucket,
             Key: s3PathPrefix + `/${file}`,
-            Body: fs.createReadStream(path.join(__dirname, tmpDir, file))
+            Body: fs.createReadStream(path.join(__dirname, tmpDir, file)),
           },
-          function(err, data) {
+          function (err, data) {
             if (err) {
               console.error(`error uploading file ${file}: ${err}`)
               return cb(err)
@@ -195,22 +195,22 @@ module.exports = function(args) {
           'xfer',
           `-user:${sftsUser}`,
           `-password:${sftsPassword}`,
-          sftsHost
+          sftsHost,
         ])
         xfer.stdin.setEncoding('utf-8')
-        xfer.stdout.once('data', data => {
+        xfer.stdout.once('data', (data) => {
           xfer.stdin.write(`cd ${sftsFolder}` + '\n')
-          xfer.stdout.once('data', data => {
+          xfer.stdout.once('data', (data) => {
             xfer.stdin.write('prompt\n')
-            xfer.stdout.once('data', data => {
+            xfer.stdout.once('data', (data) => {
               xfer.stdin.write('mdelete *\n')
-              xfer.stdout.once('data', data => {
+              xfer.stdout.once('data', (data) => {
                 xfer.stdin.end('quit\n')
               })
             })
           })
         })
-        xfer.on('close', code => {
+        xfer.on('close', (code) => {
           if (code !== 0) {
             throw new Error('error delete files from sfts')
           }
@@ -224,7 +224,7 @@ module.exports = function(args) {
           return a
         }
       }, [])
-      q.push(downloadedFiles, err => {
+      q.push(downloadedFiles, (err) => {
         if (err) {
           throw new Error(err)
         }
