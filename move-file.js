@@ -52,9 +52,21 @@ module.exports = function (args) {
       )
       xfer.stdin.setEncoding('utf-8')
       xfer.stdout.setEncoding('utf-8')
-      xfer.stdout.once('data', () => {
+      let output = ''
+      xfer.stdout.on('readable', () => {
+        while ((data = xfer.stdout.read())) {
+          output += data
+        }
+        if (!output.endsWith('> ')) return
+        xfer.stdout.removeAllListeners('readable')
         xfer.stdin.write(`cd ${sftsFolder}` + '\n')
-        xfer.stdout.once('data', () => {
+        output = ''
+        xfer.stdout.on('readable', () => {
+          while ((data = xfer.stdout.read())) {
+            output += data
+          }
+          if (!output.endsWith('> ')) return
+          xfer.stdout.removeAllListeners('readable')
           resolve(xfer)
         })
       })
@@ -67,17 +79,17 @@ module.exports = function (args) {
   function lsSfts() {
     return new Promise(async (resolve, reject) => {
       const xfer = await goToSftsFolder()
-      let output = '',
-        firstOutput = true
+      let output = ''
       xfer.stdin.write('ls\n')
       xfer.stdout.on('readable', () => {
-        output += xfer.stdout.read()
-        if (firstOutput) {
-          firstOutput = false
-          xfer.stdin.end('quit\n')
+        while ((data = xfer.stdout.read())) {
+          output += data
         }
+        if (!output.endsWith('> ')) return
+        xfer.stdout.removeAllListeners('readable')
+        xfer.stdin.end('quit\n')
       })
-      xfer.stderr.on('data', (data) => {
+      xfer.stderr.once('data', (data) => {
         reject(data)
       })
       xfer.on('close', (code) => {
@@ -97,7 +109,13 @@ module.exports = function (args) {
     return new Promise(async (resolve, reject) => {
       const xfer = await goToSftsFolder()
       xfer.stdin.write(`get ${fileName}` + '\n')
-      xfer.stdout.once('data', (data) => {
+      let output = ''
+      xfer.stdout.on('readable', () => {
+        while ((data = xfer.stdout.read())) {
+          output += data
+        }
+        if (!output.endsWith('> ')) return
+        xfer.stdout.removeAllListeners('readable')
         xfer.stdin.end('quit\n')
       })
       xfer.stderr.on('data', (data) => {
@@ -135,7 +153,13 @@ module.exports = function (args) {
     return new Promise(async (resolve, reject) => {
       const xfer = await goToSftsFolder()
       xfer.stdin.write(`delete  ${fileName}` + '\n')
-      xfer.stdout.once('data', () => {
+      let output = ''
+      xfer.stdout.on('readable', () => {
+        while ((data = xfer.stdout.read())) {
+          output += data
+        }
+        if (!output.endsWith('> ')) return
+        xfer.stdout.removeAllListeners('readable')
         xfer.stdin.end('quit\n')
       })
       xfer.stderr.on('data', (data) => {
@@ -175,6 +199,7 @@ module.exports = function (args) {
           },
           function (err, data) {
             if (err) {
+              files[file].uploaded = false
               console.error(`error uploading file ${file}: ${err}`)
               return cb(err)
             }
@@ -183,46 +208,29 @@ module.exports = function (args) {
           }
         )
       }, concurrency)
-      q.drain(() => {
+      q.drain(async () => {
+        for (const fn of Object.keys(files)) {
+          try {
+            if (
+              files[fn].downloaded !== false ||
+              files[fn].uploaded !== false
+            ) {
+              await deleteFile(fn)
+              console.info(`file ${fn} deleted`)
+            }
+          } catch (ex) {
+            console.error(`file ${fn} deletion failed`)
+          }
+        }
         // delete the files in tmpDir
         rimraf.sync(path.join(__dirname, tmpDir))
-        // delete the files in Sfts
-        const xfer = spawn('java', [
-          '-classpath',
-          `${path.join(__dirname, 'xfer', 'xfer.jar')}${
-            path.delimiter
-          }${path.join(__dirname, 'xfer', 'jna.jar')}`,
-          'xfer',
-          `-user:${sftsUser}`,
-          `-password:${sftsPassword}`,
-          sftsHost,
-        ])
-        xfer.stdin.setEncoding('utf-8')
-        xfer.stdout.once('data', (data) => {
-          xfer.stdin.write(`cd ${sftsFolder}` + '\n')
-          xfer.stdout.once('data', (data) => {
-            xfer.stdin.write('prompt\n')
-            xfer.stdout.once('data', (data) => {
-              xfer.stdin.write('mdelete *\n')
-              xfer.stdout.once('data', (data) => {
-                xfer.stdin.end('quit\n')
-              })
-            })
-          })
-        })
-        xfer.on('close', (code) => {
-          if (code !== 0) {
-            throw new Error('error delete files from sfts')
-          }
-          console.info('files deleted from source')
-          console.info('finished processing')
-        })
+        console.info('finished processing')
       })
       const downloadedFiles = Object.keys(files).reduce((a, v) => {
         if (files[v].downloaded !== false) {
           a.push(v)
-          return a
         }
+        return a
       }, [])
       q.push(downloadedFiles, (err) => {
         if (err) {
