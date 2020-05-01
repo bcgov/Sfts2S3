@@ -58,6 +58,9 @@ module.exports = function (args) {
           output += data
         }
         if (!output.endsWith('> ')) return
+        if (!output.startsWith(`User ${sftsUser} signed on`)) {
+          reject('login failed')
+        }
         xfer.stdout.removeAllListeners('readable')
         xfer.stdin.write(`cd ${sftsFolder}` + '\n')
         output = ''
@@ -67,6 +70,7 @@ module.exports = function (args) {
           }
           if (!output.endsWith('> ')) return
           xfer.stdout.removeAllListeners('readable')
+          xfer.stderr.removeAllListeners('data')
           resolve(xfer)
         })
       })
@@ -78,99 +82,121 @@ module.exports = function (args) {
 
   function lsSfts() {
     return new Promise(async (resolve, reject) => {
-      const xfer = await goToSftsFolder()
-      let output = ''
-      xfer.stdin.write('ls\n')
-      xfer.stdout.on('readable', () => {
-        while ((data = xfer.stdout.read())) {
-          output += data
-        }
-        if (!output.endsWith('> ')) return
-        xfer.stdout.removeAllListeners('readable')
-        xfer.stdin.end('quit\n')
-      })
-      xfer.stderr.once('data', (data) => {
-        reject(data)
-      })
-      xfer.on('close', (code) => {
-        if (code !== 0) {
-          return reject(code)
-        }
-        output = output.split('\n').slice(0, -1)
-        if (output.length > 0) {
-          output = output.reduce((v, e) => ((v[e.trim()] = {}), v), {})
-        }
-        resolve(output)
-      })
+      try {
+        const xfer = await goToSftsFolder()
+        let output = ''
+        xfer.stdin.write('ls\n')
+        xfer.stdout.on('readable', () => {
+          while ((data = xfer.stdout.read())) {
+            output += data
+          }
+          if (!output.endsWith('> ')) return
+          xfer.stdout.removeAllListeners('readable')
+          xfer.stdin.end('quit\n')
+        })
+        xfer.stderr.once('data', (data) => {
+          reject(data)
+        })
+        xfer.on('close', (code) => {
+          if (code !== 0) {
+            return reject(code)
+          }
+          output = output.split('\n').slice(0, -1)
+          if (output.length > 0) {
+            output = output.reduce((v, e) => ((v[e.trim()] = {}), v), {})
+          }
+          resolve(output)
+        })
+      } catch (ex) {
+        reject(ex)
+      }
     })
   }
 
   function downloadFile(fileName) {
     return new Promise(async (resolve, reject) => {
-      const xfer = await goToSftsFolder()
-      xfer.stdin.write(`get ${fileName}` + '\n')
-      let output = ''
-      xfer.stdout.on('readable', () => {
-        while ((data = xfer.stdout.read())) {
-          output += data
-        }
-        if (!output.endsWith('> ')) return
-        xfer.stdout.removeAllListeners('readable')
-        xfer.stdin.end('quit\n')
-      })
-      xfer.stderr.on('data', (data) => {
-        reject(data)
-      })
-      xfer.on('close', (code) => {
-        if (code !== 0) {
-          return reject(code)
-        }
-        resolve()
-      })
+      try {
+        const xfer = await goToSftsFolder()
+        xfer.stdin.write(`get ${fileName}` + '\n')
+        let output = ''
+        xfer.stdout.on('readable', () => {
+          while ((data = xfer.stdout.read())) {
+            output += data
+          }
+          if (!output.endsWith('> ')) return
+          xfer.stdout.removeAllListeners('readable')
+          xfer.stdin.end('quit\n')
+        })
+        xfer.stderr.on('data', (data) => {
+          reject(data)
+        })
+        xfer.on('close', (code) => {
+          if (code !== 0) {
+            return reject(code)
+          }
+          resolve()
+        })
+      } catch (ex) {
+        reject(ex)
+      }
     })
   }
 
   function renameFile(fileName, newName) {
     return new Promise(async (resolve, reject) => {
-      const xfer = await goToSftsFolder()
-      xfer.stdin.write(`rename ${fileName} ${newName}` + '\n')
-      xfer.stdout.once('data', () => {
-        xfer.stdin.end('quit\n')
-      })
-      xfer.stderr.on('data', (data) => {
-        reject(data)
-      })
-      xfer.on('close', (code) => {
-        if (code !== 0) {
-          return reject(code)
-        }
-        resolve()
-      })
+      try {
+        const xfer = await goToSftsFolder()
+        xfer.stdin.write(`rename ${fileName} ${newName}` + '\n')
+        let output = ''
+        xfer.stdout.on('readable', () => {
+          while ((data = xfer.stdout.read())) {
+            output += data
+          }
+          if (!output.endsWith('> ')) return
+          xfer.stdout.removeAllListeners('readable')
+          xfer.stdin.end('quit\n')
+        })
+        xfer.stderr.on('data', (data) => {
+          reject(data)
+        })
+        xfer.on('close', (code) => {
+          if (code !== 0) {
+            return reject(code)
+          }
+          resolve()
+        })
+      } catch (ex) {
+        reject(ex)
+      }
     })
   }
 
   function deleteFile(fileName) {
     return new Promise(async (resolve, reject) => {
-      const xfer = await goToSftsFolder()
-      xfer.stdin.write(`delete  ${fileName}` + '\n')
-      let output = ''
-      xfer.stdout.on('readable', () => {
-        while ((data = xfer.stdout.read())) {
-          output += data
-        }
-        if (!output.endsWith('> ')) return
-        xfer.stdout.removeAllListeners('readable')
-        xfer.stdin.end('quit\n')
-      })
-      xfer.stderr.on('data', (data) => {
-        reject(data)
-      })
-      xfer.on('close', (code) => {
-        if (code !== 0) {
-          return reject(code)
-        }
-        resolve()
-      })
+      try {
+        const xfer = await goToSftsFolder()
+        xfer.stdin.write(`delete  ${fileName}` + '\n')
+        let output = ''
+        xfer.stdout.on('readable', () => {
+          while ((data = xfer.stdout.read())) {
+            output += data
+          }
+          if (!output.endsWith('> ')) return
+          xfer.stdout.removeAllListeners('readable')
+          xfer.stdin.end('quit\n')
+        })
+        xfer.stderr.on('data', (data) => {
+          reject(data)
+        })
+        xfer.on('close', (code) => {
+          if (code !== 0) {
+            return reject(code)
+          }
+          resolve()
+        })
+      } catch (ex) {
+        reject(ex)
+      }
     })
   }
 
@@ -212,7 +238,7 @@ module.exports = function (args) {
         for (const fn of Object.keys(files)) {
           try {
             if (
-              files[fn].downloaded !== false ||
+              files[fn].downloaded !== false &&
               files[fn].uploaded !== false
             ) {
               await deleteFile(fn)
@@ -232,13 +258,9 @@ module.exports = function (args) {
         }
         return a
       }, [])
-      q.push(downloadedFiles, (err) => {
-        if (err) {
-          throw new Error(err)
-        }
-      })
+      q.push(downloadedFiles)
     } catch (ex) {
-      console.error(`error downloading files: ${ex}`)
+      console.error(`error transfering files: ${ex}`)
     }
   }
 }
