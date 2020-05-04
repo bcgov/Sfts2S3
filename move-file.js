@@ -123,6 +123,9 @@ module.exports = function (args) {
       for (const fn of Object.keys(files)) {
         try {
           await processFile(`get ${fn}`)
+          if (!fs.existsSync(path.join(__dirname, tmpDir, fn))) {
+            throw new Error('download failed')
+          }
           console.info(`file ${fn} downloaded`)
         } catch (ex) {
           console.error(`file ${fn} download failed`)
