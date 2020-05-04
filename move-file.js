@@ -80,12 +80,12 @@ module.exports = function (args) {
     })
   }
 
-  function lsSfts() {
+  function processFile(operation) {
     return new Promise(async (resolve, reject) => {
       try {
         const xfer = await goToSftsFolder()
         let output = ''
-        xfer.stdin.write('ls\n')
+        xfer.stdin.write(operation + '\n')
         xfer.stdout.on('readable', () => {
           while ((data = xfer.stdout.read())) {
             output += data
@@ -101,98 +101,7 @@ module.exports = function (args) {
           if (code !== 0) {
             return reject(code)
           }
-          output = output.split('\n').slice(0, -1)
-          if (output.length > 0) {
-            output = output.reduce((v, e) => ((v[e.trim()] = {}), v), {})
-          }
           resolve(output)
-        })
-      } catch (ex) {
-        reject(ex)
-      }
-    })
-  }
-
-  function downloadFile(fileName) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const xfer = await goToSftsFolder()
-        xfer.stdin.write(`get ${fileName}` + '\n')
-        let output = ''
-        xfer.stdout.on('readable', () => {
-          while ((data = xfer.stdout.read())) {
-            output += data
-          }
-          if (!output.endsWith('> ')) return
-          xfer.stdout.removeAllListeners('readable')
-          xfer.stdin.end('quit\n')
-        })
-        xfer.stderr.on('data', (data) => {
-          reject(data)
-        })
-        xfer.on('close', (code) => {
-          if (code !== 0) {
-            return reject(code)
-          }
-          resolve()
-        })
-      } catch (ex) {
-        reject(ex)
-      }
-    })
-  }
-
-  function renameFile(fileName, newName) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const xfer = await goToSftsFolder()
-        xfer.stdin.write(`rename ${fileName} ${newName}` + '\n')
-        let output = ''
-        xfer.stdout.on('readable', () => {
-          while ((data = xfer.stdout.read())) {
-            output += data
-          }
-          if (!output.endsWith('> ')) return
-          xfer.stdout.removeAllListeners('readable')
-          xfer.stdin.end('quit\n')
-        })
-        xfer.stderr.on('data', (data) => {
-          reject(data)
-        })
-        xfer.on('close', (code) => {
-          if (code !== 0) {
-            return reject(code)
-          }
-          resolve()
-        })
-      } catch (ex) {
-        reject(ex)
-      }
-    })
-  }
-
-  function deleteFile(fileName) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const xfer = await goToSftsFolder()
-        xfer.stdin.write(`delete  ${fileName}` + '\n')
-        let output = ''
-        xfer.stdout.on('readable', () => {
-          while ((data = xfer.stdout.read())) {
-            output += data
-          }
-          if (!output.endsWith('> ')) return
-          xfer.stdout.removeAllListeners('readable')
-          xfer.stdin.end('quit\n')
-        })
-        xfer.stderr.on('data', (data) => {
-          reject(data)
-        })
-        xfer.on('close', (code) => {
-          if (code !== 0) {
-            return reject(code)
-          }
-          resolve()
         })
       } catch (ex) {
         reject(ex)
@@ -206,10 +115,14 @@ module.exports = function (args) {
       if (!fs.existsSync(tmpDir)) {
         fs.mkdirSync(tmpDir)
       }
-      let files = await lsSfts()
+      let files = await processFile('ls')
+      files = files.split('\n').slice(0, -1)
+      if (files.length > 0) {
+        files = files.reduce((v, e) => ((v[e.trim()] = {}), v), {})
+      }
       for (const fn of Object.keys(files)) {
         try {
-          await downloadFile(fn)
+          await processFile(`get ${fn}`)
           console.info(`file ${fn} downloaded`)
         } catch (ex) {
           console.error(`file ${fn} download failed`)
@@ -241,7 +154,7 @@ module.exports = function (args) {
               files[fn].downloaded !== false &&
               files[fn].uploaded !== false
             ) {
-              await deleteFile(fn)
+              await processFile(`delete ${fn}`)
               console.info(`file ${fn} deleted`)
             }
           } catch (ex) {
