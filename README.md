@@ -1,4 +1,4 @@
-[![img](https://img.shields.io/badge/Lifecycle-Stable-97ca00)]
+![img](https://img.shields.io/badge/Lifecycle-Stable-97ca00)
 # sfts2s3
 Utility to move all files in a folder from BC Secure File Transfer Service to s3, once or cron. 
 
