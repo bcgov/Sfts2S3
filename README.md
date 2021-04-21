@@ -74,9 +74,9 @@ This project is in production and the GDX Analytics Team will continue to update
  
 ## Related Repositories
  
-### [GDX-Analytics/](https://github.com/bcgov/GDX-Analytics)
+### [GDX-Analytics-microservice/](https://github.com/bcgov/GDX-Analytics-microservice)
  
-This is the central repository for work by the GDX Analytics Team. It contains [Secure File Transfer System microservice](https://github.com/bcgov/GDX-Analytics/tree/master/microservices/sfts) that moves files from s3 to sfts.
+This repository houses the GDX Analytics Team microservice script including the [Secure File Transfer System microservice](https://github.com/bcgov/GDX-Analytics-microservice/tree/main/sfts) that moves files from s3 to sfts.
  
 ## Getting Help or Reporting an Issue
  
