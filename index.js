@@ -23,9 +23,6 @@ const cronTimeSpec = args.options['cron-time-spec'] || process.env.CRON_TIME_SPE
 const cronTimeZone = args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
 const runNow = (args.options['run-on-init'] === 'true') || process.env.RUN_ON_INIT || false
 
-console.log('run-on-init =',args.options['run-on-init'])
-console.log('runNow =',runNow)
-
 // add timestamp to outputs
 let log = console.log
 console.log = function () {
