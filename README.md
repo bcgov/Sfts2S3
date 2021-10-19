@@ -17,6 +17,11 @@ npm i
 node . <opts>
 ```
 
+Pass options as key=value with an equals sign, as in:
+```
+node . --run-on-init=false
+```
+
 ### Docker
 Need docker cli
 
@@ -42,19 +47,21 @@ oc delete all -l app=sfts2s3 --grace-period=0 --force --cascade
 ## Usage
 *sfts2s3* takes following input parameters in the form of either command line option or environment variable, with command line option taking precedence
 
-| Command Line Opt           | Environment Variable  | Mandatory | Description                                                                                                    |
-|----------------------------|-----------------------|-----------|----------------------------------------------------------------------------------------------------------------|
-| -s, --sfts-host|SFTS_HOST|No|SFTS host. Default to *filetransfer.gov.bc.ca*
+| Command Line Option | Argument or Environment Variable | Mandatory | Description |
+|-|-|-|-|
+| --run-on-init | RUN_ON_INIT | No | If set, a round of operation is performed immediately upon initializing. Defaults to false. |
+| -n, --no-clobber-copy | | No | If set, transfer process leaves files in SFTS and copies to S3 in a no-clobber mode. Defaults to false. |
+| -s, --sfts-host|SFTS_HOST|No|SFTS host. Defaults to *filetransfer.gov.bc.ca*
 |-u, --sfts-user|SFTS_USER|Yes|SFTS login user name. Need to have read/write permission to the SFTS folder.
 |-p, --sfts-password|SFTS_PASSWORD|Yes|SFTS login password
-|-f, --sfts-folder|SFTS_FOLDER|No|SFTS folder. Default to */*
+|-f, --sfts-folder|SFTS_FOLDER|No|SFTS folder. Defaults to */*
 | -b, --s3-bucket             | S3_BUCKET             | Yes       | s3 bucket                                                                                                      |
 | -r, --s3-path-prefix        | S3_PATH_PREFIX        | Yes       | s3 path prefix                                                                                                 |
 | -a, --aws-access-key-id     | AWS_ACCESS_KEY_ID     | Yes       | aws access key id. The associated user needs to have write access to the S3 bucket path.|
 | -k, --aws-secret-access-key | AWS_SECRET_ACCESS_KEY | Yes       | aws secret access key|
-| -c, --cron-time-spec        | CRON_TIME_SPEC        | No        | [node cron patterns](https://github.com/kelektiv/node-cron#available-cron-patterns). *0 0 \* \* \* \** as hourly on the hour, for example. If not set then run once. If set, a round of operation is performed immediately upon launching regardless of time spec. |
+| -c, --cron-time-spec        | CRON_TIME_SPEC        | No        | [node cron patterns](https://github.com/kelektiv/node-cron#available-cron-patterns). *0 0 \* \* \* \** as hourly on the hour, for example. |
 | -z, --cron-time-zone        | CRON_TIME_ZONE        | No        | time zone such as *America/Vancouver*. All time zones are available at [Moment Timezone](http://momentjs.com/timezone/).  |
-| -C, --concurrency        | CONCURRENCY        | No        | How many files are processed concurrently when uploading to S3? Default to 10 if not set. |
+| -C, --concurrency        | CONCURRENCY        | No        | How many files are processed concurrently when uploading to S3? Defaults to 10 if not set. |
 
 ## Limitations
 

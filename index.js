@@ -1,5 +1,6 @@
 const getOpt = require('node-getopt')
     .create([
+        ['', 'run-on-init[=<string>]', 'run once on initialization'],
         ['s', 'sfts-host=<string>', 'SFTS host'],
         ['u', 'sfts-user=<string>', 'SFTS login user name'],
         ['p', 'sfts-password=<string>', 'SFTS login password'],
@@ -20,6 +21,10 @@ const args = getOpt.parseSystem()
 const moveFile = require('./move-file')(args)
 const cronTimeSpec = args.options['cron-time-spec'] || process.env.CRON_TIME_SPEC
 const cronTimeZone = args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
+const runNow = (args.options['run-on-init'] === 'true') || process.env.RUN_ON_INIT || false
+
+console.log('run-on-init =',args.options['run-on-init'])
+console.log('runNow =',runNow)
 
 // add timestamp to outputs
 let log = console.log
@@ -38,15 +43,20 @@ console.info = function () {
     info.apply(console, arguments)
 }
 
-if (!cronTimeSpec) {
+if (runNow) {
+    console.info('running once')
     moveFile()
+}
+if (!cronTimeSpec) {
+    console.info('no cron-time-spec, quitting.')
     return
 }
+console.info('configuring cron-time-spec:', cronTimeSpec)
 const CronJob = require('cron').CronJob
 new CronJob({
     cronTime: cronTimeSpec,
     onTick: moveFile,
-    runOnInit: true,
+    runOnInit: false,
     start: true,
     timeZone: cronTimeZone
 })
