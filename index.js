@@ -1,10 +1,12 @@
 const getOpt = require('node-getopt')
     .create([
-        ['', 'run-on-init[=<string>]', 'run once on initialization'],
-        ['s', 'sfts-host=<string>', 'SFTS host'],
+        ['', 'run-on-init[=<string>]', 'run once on initialization (\'true\' or \'false\')'],
+        ['m', 'mode=<string>', 'mode can be \'mv\' to move files or \'cp\' to copy files'],
+        ['n', 'no-clobber=<string>', 'Non clobbering copy mode (\'true\' or \'false\')'],
+        ['s', 'sfts-host=<string>', 'SFTS host. Defaults to \'filetransfer.gov.bc.ca\''],
         ['u', 'sfts-user=<string>', 'SFTS login user name'],
         ['p', 'sfts-password=<string>', 'SFTS login password'],
-        ['f', 'sfts-folder=<string>', 'SFTS folder'],
+        ['f', 'sfts-folder=<string>', 'SFTS folder. Defaults to \'/\''],
         ['b', 's3-bucket=<string>', 's3 bucket'],
         ['r', 's3-path-prefix=<string>', 's3 path prefix'],
         ['a', 'aws-access-key-id=<string>', 'aws access key id'],
@@ -19,9 +21,12 @@ const getOpt = require('node-getopt')
     )
 const args = getOpt.parseSystem()
 const moveFile = require('./move-file')(args)
-const cronTimeSpec = args.options['cron-time-spec'] || process.env.CRON_TIME_SPEC
-const cronTimeZone = args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
-const runNow = (args.options['run-on-init'] === 'true') || process.env.RUN_ON_INIT || false
+const cronTimeSpec =
+    args.options['cron-time-spec'] || process.env.CRON_TIME_SPEC
+const cronTimeZone =
+    args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
+const runNow =
+    args.options['run-on-init'] === 'true' || process.env.RUN_ON_INIT || false
 
 // add timestamp to outputs
 let log = console.log
