@@ -1,7 +1,7 @@
 const getOpt = require('node-getopt')
     .create([
         ['', 'run-on-init[=<string>]', 'run once on initialization (\'true\' or \'false\')'],
-        ['m', 'mode=<string>', 'mode can be \'mv\' to move files or \'cp\' to copy files'],
+        ['m', 'mode=<string>', 'mode can be \'mv\' to move files or \'cp\' to copy files. Defaults to \'cp\''],
         ['n', 'no-clobber=<string>', 'Non clobbering copy mode (\'true\' or \'false\')'],
         ['s', 'sfts-host=<string>', 'SFTS host. Defaults to \'filetransfer.gov.bc.ca\''],
         ['u', 'sfts-user=<string>', 'SFTS login user name'],

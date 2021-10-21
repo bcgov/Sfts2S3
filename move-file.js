@@ -29,6 +29,9 @@ module.exports = function (args) {
     args.options['aws-secret-access-key'] || process.env.AWS_SECRET_ACCESS_KEY
   const concurrency =
     args.options['concurrency'] || process.env.CONCURRENCY || 10
+  const mode = args.options['mode'] || process.env.MODE || 'mv'
+  const mv = ( mode === 'mv' )
+  const cp = ( mode === 'cp' )
   const queue = require('async/queue')
 
   const AWS = require('aws-sdk')
@@ -159,17 +162,20 @@ module.exports = function (args) {
         )
       }, concurrency)
       q.drain(async () => {
-        for (const fn of Object.keys(files)) {
-          try {
-            if (
-              files[fn].downloaded !== false &&
-              files[fn].uploaded !== false
-            ) {
-              await processFile(`delete ${fn}`)
-              console.info(`file ${fn} deleted`)
+        // Only drain SFTS folder if mode is mv
+        if (mv) {
+          for (const fn of Object.keys(files)) {
+            try {
+              if (
+                files[fn].downloaded !== false &&
+                files[fn].uploaded !== false
+              ) {
+                await processFile(`delete ${fn}`)
+                console.info(`file ${fn} deleted`)
+              }
+            } catch (ex) {
+              console.error(`file ${fn} deletion failed`)
             }
-          } catch (ex) {
-            console.error(`file ${fn} deletion failed`)
           }
         }
         // delete the files in tmpDir
