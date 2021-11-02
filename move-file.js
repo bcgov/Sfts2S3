@@ -92,6 +92,7 @@ module.exports = function (args) {
   // Processes an operation against a file through MOVEit XFer
   // The list of possible operations is at:
   // https://docs.ipswitch.com/MOVEit/DMZ90/FreelyXfer/MOVEitXferManual.html#commands
+
   function processFile(operation) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -170,7 +171,6 @@ module.exports = function (args) {
         // Choose the files to move or copy from SFTS to S3
         files = files.filter(x => !s3Files.includes(x));
       }
-
       if (files.length > 0) {
         files = files.reduce((v, e) => ((v[e.trim()] = {}), v), {})
       }
