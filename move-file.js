@@ -3,8 +3,6 @@ module.exports = function (args) {
   const path = require('path')
   const tmpDir = 'tmp'
   const rimraf = require('rimraf')
-  const mode =
-    args.options['mode'] || process.env.MODE
   const noClobber =
     args.options['no-clobber'] === 'true' ||
     process.env.NO_CLOBBER ||
@@ -91,6 +89,9 @@ module.exports = function (args) {
     })
   }
 
+  // Processes an operation against a file through MOVEit XFer
+  // The list of possible operations is at:
+  // https://docs.ipswitch.com/MOVEit/DMZ90/FreelyXfer/MOVEitXferManual.html#commands
   function processFile(operation) {
     return new Promise(async (resolve, reject) => {
       try {
@@ -120,14 +121,56 @@ module.exports = function (args) {
     })
   }
 
+  // Return a list of files in S3 under the prefix
+  function s3FileList() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        s3.listObjectsV2(
+          {
+            Bucket: s3Bucket,
+            Prefix: s3PathPrefix
+          }, (err, data) => {
+            if (err) { reject (err) }
+            else {
+              let files = []
+              const regex = /[^/]+$/g;
+              for (const o of data.Contents) {
+                let fn = o.Key.match(regex)
+                if (fn !== null && fn[0] !== ''){
+                  files.push(fn[0])
+                }
+              }
+              resolve(files) }
+          }
+        )
+      }
+      catch (ex) {
+        reject(ex)
+      }
+    })
+  }
+
+  // Triggered by the call to moveFile() from index.js
   return async function () {
+    // Fetch the files from SFTS
     console.info('started processing')
     try {
+      // Create a temporary directory if it doesn't exist
       if (!fs.existsSync(tmpDir)) {
         fs.mkdirSync(tmpDir)
       }
+      // Store the string response of files in SFTS as a list
       let files = await processFile('ls')
       files = files.split('\n').slice(0, -1)
+
+      if (noClobber) {
+        // Store the list of files at the S3 folder
+        let s3Files = await s3FileList()
+
+        // Choose the files to move or copy from SFTS to S3
+        files = files.filter(x => !s3Files.includes(x));
+      }
+
       if (files.length > 0) {
         files = files.reduce((v, e) => ((v[e.trim()] = {}), v), {})
       }
@@ -151,6 +194,7 @@ module.exports = function (args) {
             Body: fs.createReadStream(path.join(__dirname, tmpDir, file)),
           },
           function (err, data) {
+            // TODO: If a file upload fails touch an empty file of the same prefixed with /bad
             if (err) {
               files[file].uploaded = false
               console.error(`error uploading file ${file}: ${err}`)
@@ -162,7 +206,7 @@ module.exports = function (args) {
         )
       }, concurrency)
       q.drain(async () => {
-        // Only drain SFTS folder if mode is mv
+        // Only drain SFTS folder if the mode is set to `mv`
         if (mv) {
           for (const fn of Object.keys(files)) {
             try {

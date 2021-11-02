@@ -1,6 +1,6 @@
 {
   "name": "sfts2s3",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "move files from BC Secure File Transfer Service to s3, once or cron",
   "main": "index.js",
   "scripts": {

@@ -46,7 +46,7 @@ console.info = function () {
 }
 
 if (runNow) {
-    console.info('running once')
+    console.info('run-on-init is set. Running once.')
     moveFile()
 }
 if (!cronTimeSpec) {

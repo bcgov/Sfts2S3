@@ -47,25 +47,40 @@ oc delete all -l app=sfts2s3 --grace-period=0 --force --cascade
 ## Usage
 *sfts2s3* takes following input parameters in the form of either command line option or environment variable, with command line option taking precedence
 
-| Command Line Option | Argument or Environment Variable | Mandatory | Description |
-|-|-|-|-|
-| --run-on-init | RUN_ON_INIT | No | If set, a round of operation is performed immediately upon initializing. Defaults to false. |
-| -n, --no-clobber-copy | | No | If set, transfer process leaves files in SFTS and copies to S3 in a no-clobber mode. Defaults to false. |
-| -s, --sfts-host|SFTS_HOST|No|SFTS host. Defaults to *filetransfer.gov.bc.ca*
-|-u, --sfts-user|SFTS_USER|Yes|SFTS login user name. Need to have read/write permission to the SFTS folder.
-|-p, --sfts-password|SFTS_PASSWORD|Yes|SFTS login password
-|-f, --sfts-folder|SFTS_FOLDER|No|SFTS folder. Defaults to */*
-| -b, --s3-bucket             | S3_BUCKET             | Yes       | s3 bucket                                                                                                      |
-| -r, --s3-path-prefix        | S3_PATH_PREFIX        | Yes       | s3 path prefix                                                                                                 |
-| -a, --aws-access-key-id     | AWS_ACCESS_KEY_ID     | Yes       | aws access key id. The associated user needs to have write access to the S3 bucket path.|
-| -k, --aws-secret-access-key | AWS_SECRET_ACCESS_KEY | Yes       | aws secret access key|
-| -c, --cron-time-spec        | CRON_TIME_SPEC        | No        | [node cron patterns](https://github.com/kelektiv/node-cron#available-cron-patterns). *0 0 \* \* \* \** as hourly on the hour, for example. |
-| -z, --cron-time-zone        | CRON_TIME_ZONE        | No        | time zone such as *America/Vancouver*. All time zones are available at [Moment Timezone](http://momentjs.com/timezone/).  |
-| -C, --concurrency        | CONCURRENCY        | No        | How many files are processed concurrently when uploading to S3? Defaults to 10 if not set. |
+| Command Line Option         | Argument or Environment Variable | Mandatory | Description                                                                                                                                                                                                                      |
+|-----------------------------|----------------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --run-on-init               | RUN_ON_INIT                      | No        | `true` or `false`. If set, a round of operation is performed immediately upon initializing. Defaults to false.                                                                                                                   |
+| -m, --mode                  | MODE                             | No        | mode can be *`mv`* to move files (drains SFTS of moved files) or *`cp`* to copy files. Defaults to *`mv`*                                                                                                                        |
+| -n, --no-clobber            | NO_CLOBBER                       | No        | *`true`* or *`false`*. If set, transfer process leaves files in SFTS and copies or moves them to S3 in a no-clobber mode (will not overwrite existing files with the same name that already exist in S3). Defaults to *`false`*. |
+| -s, --sfts-host             | SFTS_HOST                        | No        | SFTS host. Defaults to *`filetransfer.gov.bc.ca`*.                                                                                                                                                                               |
+| -u, --sfts-user             | SFTS_USER                        | Yes       | SFTS login user name. Need to have read/write permission to the SFTS folder.                                                                                                                                                     |
+| -p, --sfts-password         | SFTS_PASSWORD                    | Yes       | SFTS login password.                                                                                                                                                                                                             |
+| -f, --sfts-folder           | SFTS_FOLDER                      | No        | SFTS folder. Defaults to *`/`*.                                                                                                                                                                                                  |
+| -b, --s3-bucket             | S3_BUCKET                        | Yes       | s3 bucket                                                                                                                                                                                                                        |
+| -r, --s3-path-prefix        | S3_PATH_PREFIX                   | Yes       | s3 path prefix                                                                                                                                                                                                                   |
+| -a, --aws-access-key-id     | AWS_ACCESS_KEY_ID                | Yes       | aws access key id. The associated user needs to have write access to the S3 bucket path.                                                                                                                                         |
+| -k, --aws-secret-access-key | AWS_SECRET_ACCESS_KEY            | Yes       | aws secret access key                                                                                                                                                                                                            |
+| -c, --cron-time-spec        | CRON_TIME_SPEC                   | No        | [node cron patterns](https://github.com/kelektiv/node-cron#available-cron-patterns). *`0 0 * * * *`* as hourly on the hour, for example.                                                                                         |
+| -z, --cron-time-zone        | CRON_TIME_ZONE                   | No        | time zone such as *`America/Vancouver`*. All time zones are available at [Moment Timezone](http://momentjs.com/timezone/).                                                                                                       |
+| -C, --concurrency           | CONCURRENCY                      | No        | How many files are processed concurrently when uploading to S3? Defaults to 10 if not set.                                                                                                                                       |
+
 
 ## Limitations
 
   * only moving files in leaf folder has been tested
+
+## Version history
+
+### v1.1.0
+ - Introduces options: run-on-init, mode, and no-clobber-copy. New options are defaulted to maintain backwards compatibility with v1.0.0.
+   - run-on-init defaults to `false`. Changing to `true` will trigger a SFTS2S3 transfer process once at deployment time.
+   - mode introduces a `cp` mode, which will preserve files in SFTS without deleting them after the transfer as v1.0.0 did. Defaults to `mv` to retain v1.0.0 behaviour as default. Changing to `cp` will not drain the origin files from SFTS.
+   - no-clobber defaults to `flase`. Changing to `true` will not move files into S3 that already exist there.
+
+### v1.0.0
+ - Moves all files from SFTS to S3 path prefix
+ - Drains files from SFTS by default
+
 
 ## License
 
