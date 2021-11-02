@@ -187,6 +187,7 @@ module.exports = function (args) {
         }
       }
       const q = queue((file, cb) => {
+        // Upload the file to s3 with the body of the file as a read stream
         s3.upload(
           {
             Bucket: s3Bucket,
@@ -194,10 +195,25 @@ module.exports = function (args) {
             Body: fs.createReadStream(path.join(__dirname, tmpDir, file)),
           },
           function (err, data) {
-            // TODO: If a file upload fails touch an empty file of the same prefixed with /bad
             if (err) {
               files[file].uploaded = false
               console.error(`error uploading file ${file}: ${err}`)
+              // If a file upload fails, attempt to touch a file of the same prefixed with /bad
+              s3.upload(
+                {
+                  Bucket: s3Bucket,
+                  Key: s3PathPrefix + `/bad/${file}`,
+                  Body: `Error transferring file : ${sftsFolder}${file}\n`
+                      + `Triggered by SFTS user: ${sftsUser}\n`
+                      + `Timestamp of error: ${Date()}.`
+                },
+                function (errBad, dataBad) {
+                  if (errBad){
+                    console.error(`error touching a reference to the `
+                    + `file under the /bad path on S3: ${errBad}`)
+                  }
+                }
+              )
               return cb(err)
             }
             console.info(`uploaded file ${file}`)
