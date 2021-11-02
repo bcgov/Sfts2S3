@@ -1,6 +1,6 @@
 const getOpt = require('node-getopt')
     .create([
-        ['', 'run-on-init[=<string>]', 'run once on initialization (\'true\' or \'false\')'],
+        ['', 'run-on-init[=<string>]', 'run once on initialization (\'true\' or \'false\'). Defaults to \'true\''],
         ['m', 'mode=<string>', 'mode can be \'mv\' to move files or \'cp\' to copy files. Defaults to \'cp\''],
         ['n', 'no-clobber=<string>', 'Non clobbering copy mode (\'true\' or \'false\')'],
         ['s', 'sfts-host=<string>', 'SFTS host. Defaults to \'filetransfer.gov.bc.ca\''],
@@ -26,7 +26,7 @@ const cronTimeSpec =
 const cronTimeZone =
     args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
 const runNow =
-    args.options['run-on-init'] === 'true' || process.env.RUN_ON_INIT || false
+    args.options['run-on-init'] === 'true' || process.env.RUN_ON_INIT || true
 
 // add timestamp to outputs
 let log = console.log

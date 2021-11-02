@@ -73,14 +73,13 @@ oc delete all -l app=sfts2s3 --grace-period=0 --force --cascade
 
 ### v1.1.0
  - Introduces options: run-on-init, mode, and no-clobber-copy. New options are defaulted to maintain backwards compatibility with v1.0.0.
-   - run-on-init defaults to `false`. Changing to `true` will trigger a SFTS2S3 transfer process once at deployment time.
-   - mode introduces a `cp` mode, which will preserve files in SFTS without deleting them after the transfer as v1.0.0 did. Defaults to `mv` to retain v1.0.0 behaviour as default. Changing to `cp` will not drain the origin files from SFTS.
-   - no-clobber defaults to `flase`. Changing to `true` will not move files into S3 that already exist there.
+   - run-on-init if `true` will trigger a SFTS2S3 transfer process once at deployment time. Deployment will continue to run according to cron-time-spec if set. To retain v1.0.0 behavior, this option defaults to `false`.
+   - mode introduces a `cp` mode, which will preserve files in SFTS without deleting them after the transfer as v1.0.0 did. To retain v1.0.0 behavior, this option defaults to `mv`. 
+   - no-clobber introduces a the option to not overwrite files in S3 if files of the same name already exist. Enabled by setting to `true`. To retain v1.0.0 behavior, this option defaults to `flase`.
 
 ### v1.0.0
  - Moves all files from SFTS to S3 path prefix
  - Drains files from SFTS by default
-
 
 ## License
 
