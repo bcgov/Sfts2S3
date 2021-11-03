@@ -3,10 +3,10 @@ module.exports = function (args) {
   const path = require('path')
   const tmpDir = 'tmp'
   const rimraf = require('rimraf')
-  const noClobber =
-    args.options['no-clobber'] === 'true' ||
-    process.env.NO_CLOBBER ||
-    false
+  let noClobber = true
+  if (args.options['no-clobber'] === 'false' || process.env.NO_CLOBBER === 'false'){
+    noClobber = false
+  }
   const sftsHost =
     args.options['sfts-host'] ||
     process.env.SFTS_HOST ||
@@ -29,7 +29,6 @@ module.exports = function (args) {
     args.options['concurrency'] || process.env.CONCURRENCY || 10
   const mode = args.options['mode'] || process.env.MODE || 'mv'
   const mv = ( mode === 'mv' )
-  const cp = ( mode === 'cp' )
   const queue = require('async/queue')
 
   const AWS = require('aws-sdk')

@@ -25,9 +25,10 @@ const cronTimeSpec =
     args.options['cron-time-spec'] || process.env.CRON_TIME_SPEC
 const cronTimeZone =
     args.options['cron-time-zone'] || process.env.CRON_TIME_ZONE
-const runNow =
-    args.options['run-on-init'] === 'true' || process.env.RUN_ON_INIT || true
-
+let runNow = true
+if (args.options['run-on-init'] === 'false' || process.env.RUN_ON_INIT === 'false'){
+    runNow = false
+}
 // add timestamp to outputs
 let log = console.log
 console.log = function () {
@@ -45,12 +46,13 @@ console.info = function () {
     info.apply(console, arguments)
 }
 
+// TODO: convert string to boolean
 if (runNow) {
     console.info('run-on-init is set. Running once.')
     moveFile()
 }
 if (!cronTimeSpec) {
-    console.info('no cron-time-spec, quitting.')
+    console.info(`no cron-time-spec${runNow ? '.' : ', quitting.' }`)
     return
 }
 console.info('configuring cron-time-spec:', cronTimeSpec)
