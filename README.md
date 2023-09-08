@@ -3,6 +3,9 @@
 # sfts2s3
 Utility to move all files in a folder from BC Secure File Transfer Service to s3, once or cron. 
 
+## Notes
+This repo has been archived as it is currently not in use. Please see ticket https://apps.itsm.gov.bc.ca/jira/browse/GDXDSD-5928 for more information.
+
 ## Features
  
 * Move or copy files from sfts to s3
