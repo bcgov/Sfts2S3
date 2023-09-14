@@ -1,6 +1,8 @@
 [![Lifecycle:Retired](https://img.shields.io/badge/Lifecycle-Retired-d45500)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 # sfts2s3
+> **:warning: Note:** This repo has been archived as it is currently not in use.
+
 Utility to move all files in a folder from BC Secure File Transfer Service to s3, once or cron. 
 
 ## Features
